@@ -1,5 +1,6 @@
 import psycopg2
 import random
+import time
 from config import config
 
 
@@ -41,11 +42,11 @@ def create_tables():
     commands = (
         """
         CREATE TABLE feedbacklamp (
-            lamp_id SERIAL PRIMARY KEY,
-            lamp_decibel INTEGER
+            teHard_id SERIAL PRIMARY KEY,
+            lamp_decibel INTEGER,
+            datum_teHard DATE,
+            tijd_teHard TIME
         );
-        
-        DROP TABLE IF EXISTS feedbacklamp;
         """)
 
     conn = None
@@ -69,12 +70,12 @@ def create_tables():
             conn.close()
 
 
-def insert_feedbacklamp(lamp_decibel):
+def insert_feedbacklamp(lamp_decibel, datum_teHard, tijd_teHard):
     """ insert a new vendor into the vendors table """
-    sql = """INSERT INTO feedbacklamp(lamp_decibel)
-             VALUES(%s) RETURNING lamp_id;"""
+    sql = """INSERT INTO feedbacklamp(lamp_decibel, datum_teHard, tijd_teHard)
+             VALUES(%s, %s, %s) RETURNING teHard_id;"""
     conn = None
-    lamp_id = None
+    teHard_id = None
     try:
         # read database configuration
         params = config()
@@ -83,9 +84,9 @@ def insert_feedbacklamp(lamp_decibel):
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql, (lamp_decibel,))
+        cur.execute(sql, (lamp_decibel, datum_teHard, tijd_teHard, ))
         # get the generated id back
-        vendor_id = cur.fetchone()[0]
+        teHard_id = cur.fetchone()[0]
         # commit the changes to the database
         conn.commit()
         # close communication with the database
@@ -96,23 +97,38 @@ def insert_feedbacklamp(lamp_decibel):
         if conn is not None:
             conn.close()
 
-    return lamp_id
+    return teHard_id
 
 
-def get_db_value():
+def get_date():
+    d = time.strftime("%x")
+    return d
+
+
+def get_time():
+    t = time.strftime("%X")
+    return t
+
+
+def get_decibel_value():
     db_value = random.randint(10, 70)
+
     return db_value
-
-
-def send_decibel(dBa_value, limit):
-    if dBa_value < limit:
-        print(f'NOPE: {dBa_value}')
-        send_decibel(get_db_value(), limit)
-    elif dBa_value >= limit:
-        print(f'YES: {dBa_value}')
-        return dBa_value
 
 
 # This Executes the program in order of functions
 if __name__ == '__main__':
-    send_decibel(get_db_value(), 50)
+
+    limit = 50
+
+    decibel = get_decibel_value()
+    datum = get_date()
+    tijd = get_time()
+
+    if decibel > limit:
+        print(decibel, datum, tijd)
+        # insert_feedbacklamp(decibel, datum, tijd)
+    else:
+        print(f'Te zacht {decibel}')
+
+
