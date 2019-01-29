@@ -129,6 +129,6 @@ if __name__ == '__main__':
         print(decibel, datum, tijd)
         # insert_feedbacklamp(decibel, datum, tijd)
     else:
-        print(f'Te zacht {decibel}')
+        print('Te zacht')
 
 

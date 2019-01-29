@@ -27,7 +27,7 @@ def is_meaningful(old, new):
     return abs(old - new) > 3
 
 
-def listen(old=0, error_count=0, min_decibel=100, max_decibel=0):
+def listen(old=0, error_count=0, min_decibel=50, max_decibel=0):
     print("Listening")
     while True:
         try:
