@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     if decibel > limit:
         print(decibel, datum, tijd)
-        # insert_feedbacklamp(decibel, datum, tijd)
+        insert_feedbacklamp(decibel, datum, tijd)
     else:
         print('Te zacht')
 

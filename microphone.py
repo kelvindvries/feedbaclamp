@@ -31,16 +31,16 @@ def listen(old=0, error_count=0, min_decibel=50, max_decibel=0):
     print("Listening")
     while True:
         try:
-            ## read() returns string. You need to decode it into an array later.
+            # read() returns string. You need to decode it into an array later.
             block = stream.read(CHUNK)
         except IOError as e:
             error_count += 1
             print(" (%d) Error recording: %s" % (error_count, e))
         else:
-            ## Int16 is a numpy data type which is Integer (-32768 to 32767)
-            ## If you put Int8 or Int32, the result numbers will be ridiculous
+            # Int16 is a numpy data type which is Integer (-32768 to 32767)
+            # If you put Int8 or Int32, the result numbers will be ridiculous
             decoded_block = numpy.fromstring(block, 'Int16')
-            ## This is where you apply A-weighted filter
+            # This is where you apply A-weighted filter
             y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
             new_decibel = 20 * numpy.log10(spl.rms_flat(y))
             if is_meaningful(old, new_decibel):
