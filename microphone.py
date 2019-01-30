@@ -2,6 +2,7 @@ import pyaudio
 import numpy
 import spl_lib as spl
 from scipy.signal import lfilter
+import connect_database
 
 CHUNKS = [4096, 9600]  # Use what you need
 CHUNK = CHUNKS[1]
@@ -27,7 +28,7 @@ def is_meaningful(old, new):
     return abs(old - new) > 3
 
 
-def listen(old=0, error_count=0, min_decibel=50, max_decibel=0):
+def listen(error_count=0):
     print("Listening")
     while True:
         try:
@@ -43,13 +44,16 @@ def listen(old=0, error_count=0, min_decibel=50, max_decibel=0):
             # This is where you apply A-weighted filter
             y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
             new_decibel = 20 * numpy.log10(spl.rms_flat(y))
-            if is_meaningful(old, new_decibel):
-                old = new_decibel
-                print('A-weighted: {:+.2f} dB'.format(new_decibel))
-                max_decibel = max_decibel
+            # print('A-weighted: {:+.2f} dB'.format(new_decibel))
+            if new_decibel > 50:
+                print (new_decibel)
+                connect_database.insert_feedbacklamp(new_decibel, connect_database.get_date(),
+                                                     connect_database.get_time())
 
     stream.stop_stream()
     stream.close()
     pa.terminate()
 
-listen()
+
+if __name__ == ("__main__"):
+    listen()
