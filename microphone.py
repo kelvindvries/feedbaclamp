@@ -2,6 +2,7 @@ import pyaudio
 import numpy
 import spl_lib as spl
 from scipy.signal import lfilter
+import connect_database
 
 CHUNKS = [4096, 9600]  # Use what you need
 CHUNK = CHUNKS[1]
@@ -27,29 +28,32 @@ def is_meaningful(old, new):
     return abs(old - new) > 3
 
 
-def listen(old=0, error_count=0, min_decibel=100, max_decibel=0):
+def listen(error_count=0):
     print("Listening")
     while True:
         try:
-            ## read() returns string. You need to decode it into an array later.
+            # read() returns string. You need to decode it into an array later.
             block = stream.read(CHUNK)
         except IOError as e:
             error_count += 1
             print(" (%d) Error recording: %s" % (error_count, e))
         else:
-            ## Int16 is a numpy data type which is Integer (-32768 to 32767)
-            ## If you put Int8 or Int32, the result numbers will be ridiculous
+            # Int16 is a numpy data type which is Integer (-32768 to 32767)
+            # If you put Int8 or Int32, the result numbers will be ridiculous
             decoded_block = numpy.fromstring(block, 'Int16')
-            ## This is where you apply A-weighted filter
+            # This is where you apply A-weighted filter
             y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
             new_decibel = 20 * numpy.log10(spl.rms_flat(y))
-            if is_meaningful(old, new_decibel):
-                old = new_decibel
-                print('A-weighted: {:+.2f} dB'.format(new_decibel))
-                max_decibel = max_decibel
+            # print('A-weighted: {:+.2f} dB'.format(new_decibel))
+            if new_decibel > 50:
+                print (new_decibel)
+                connect_database.insert_feedbacklamp(new_decibel, connect_database.get_date(),
+                                                     connect_database.get_time())
 
     stream.stop_stream()
     stream.close()
     pa.terminate()
 
-listen()
+
+if __name__ == ("__main__"):
+    listen()

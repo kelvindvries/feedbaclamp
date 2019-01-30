@@ -1,5 +1,4 @@
 import psycopg2
-import random
 import time
 from config import config
 
@@ -108,27 +107,3 @@ def get_date():
 def get_time():
     t = time.strftime("%X")
     return t
-
-
-def get_decibel_value():
-    db_value = random.randint(10, 70)
-
-    return db_value
-
-
-# This Executes the program in order of functions
-if __name__ == '__main__':
-
-    limit = 50
-
-    decibel = get_decibel_value()
-    datum = get_date()
-    tijd = get_time()
-
-    if decibel > limit:
-        print(decibel, datum, tijd)
-        # insert_feedbacklamp(decibel, datum, tijd)
-    else:
-        print(f'Te zacht {decibel}')
-
-
