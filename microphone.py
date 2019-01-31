@@ -25,11 +25,8 @@ stream = pa.open(format=FORMAT,
                  frames_per_buffer=CHUNK)
 
 
-def is_meaningful(old, new):
-    return abs(old - new) > 3
-
-
-def listen(error_count=0):
+def mic(error_count=0):
+    # This listens to incoming sound, processes the sound, returns db and sends it to the database.
     print("Listening")
     while True:
         try:
@@ -92,4 +89,5 @@ def listen(error_count=0):
 
 
 if __name__ == ("__main__"):
-    listen()
+    # This starts the listen function
+    mic()
