@@ -3,6 +3,7 @@ import numpy
 import spl_lib as spl
 from scipy.signal import lfilter
 import connect_database
+import RPi.GPIO as GPIO
 
 CHUNKS = [4096, 9600]  # Use what you need
 CHUNK = CHUNKS[1]
@@ -44,11 +45,46 @@ def listen(error_count=0):
             # This is where you apply A-weighted filter
             y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
             new_decibel = 20 * numpy.log10(spl.rms_flat(y))
-            # print('A-weighted: {:+.2f} dB'.format(new_decibel))
-            if new_decibel > 50:
+
+            red_limit = 50
+            leds = [18, 11, 13, 15, 16]
+
+            GPIO.setmode(GPIO.BOARD)
+            GPIO.setwarnings(False)
+            GPIO.setup(leds, GPIO.OUT)
+
+            if new_decibel >= red_limit - 40:
+                GPIO.output(leds[0], True)
+                print("Onder limiet")
+            else: GPIO.output(leds[0], False)
+
+            if new_decibel >= red_limit - 30:
+                GPIO.output(leds[1], True)
+                print("onder 20 db")
+            else: GPIO.output(leds[1], False)
+
+            if new_decibel >= red_limit - 20:
+                print ('onder 30db')
+                GPIO.output(leds[2], True)
+            else: GPIO.output(leds[2], False)
+
+            if new_decibel >= red_limit - 10:
+                print ('onder 40 db')
+                GPIO.output(leds[3], True)
+            else: GPIO.output(leds[3], False)
+
+            if new_decibel > red_limit:
+                GPIO.output(leds[4], True)
+                print("Red")
+            else: GPIO.output(leds[4], False)
+
+            # print('A-weighted: {:+.2f} dB'.format(new_decibel)) and end db to database
+            if new_decibel > red_limit:
                 print (new_decibel)
                 connect_database.insert_feedbacklamp(new_decibel, connect_database.get_date(),
                                                      connect_database.get_time())
+
+            GPIO.cleanup()
 
     stream.stop_stream()
     stream.close()
