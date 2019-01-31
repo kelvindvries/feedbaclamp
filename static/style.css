@@ -1,0 +1,18 @@
+body{
+    background: gray;
+    color: black;
+}
+
+h1{
+    text-align: center;
+    text-decoration: underline;
+    text-transform: uppercase;
+}
+
+p{
+    text-align: center;
+}
+
+form{
+    text-align: center;
+}
